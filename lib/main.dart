@@ -17,7 +17,7 @@ class PingNetCVEApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Ping & Net + CVE',
+      title: 'Network + CVE Tools',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,

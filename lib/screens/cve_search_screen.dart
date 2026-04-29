@@ -45,20 +45,23 @@ class _CveSearchScreenState extends State<CveSearchScreen>
   }
 
   Future<void> _loadNewsFeed() async {
+    if (!mounted) return;
     setState(() => _isFeedLoading = true);
     try {
       final items = await _nvdService.getRecentCves();
+      if (!mounted) return;
       setState(() {
         _newsFeed = items;
         _isFeedLoading = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() => _isFeedLoading = false);
     }
   }
 
   Future<void> _search(String query) async {
-    if (query.trim().isEmpty) return;
+    if (query.trim().isEmpty || !mounted) return;
     setState(() {
       _isLoading = true;
       _error = null;
@@ -66,12 +69,14 @@ class _CveSearchScreenState extends State<CveSearchScreen>
     });
     try {
       final results = await _nvdService.searchCves(query.trim());
+      if (!mounted) return;
       setState(() {
         _results = results;
         _isLoading = false;
       });
       _tabController.animateTo(1);
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _error = e.toString();
         _isLoading = false;

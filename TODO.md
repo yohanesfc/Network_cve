@@ -14,5 +14,10 @@
 - [x] Add feature screen: Path MTU
 - [x] Wire all HomeScreen buttons to implemented feature screens
 - [x] Run `flutter pub get`
-- [ ] Run `flutter analyze` and fix issues
-- [ ] Update TODO progress and finalize
+- [x] Rebrand title to `Network + CVE Tools` across app/tests
+- [x] Implement working traceroute flow in `TracerouteScreen` (mobile-safe)
+- [x] Replace Wake on LAN with Subnet Calculator
+- [x] Implement functional RDAP screen and wire from Home
+- [x] Run `flutter test` (abort if environment/device constraints)
+- [x] Run `flutter analyze` and fix issues
+- [x] Update TODO progress and finalize

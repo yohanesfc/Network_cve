@@ -66,6 +66,7 @@ class HostInputWidget extends StatelessWidget {
                   child: DropdownButtonHideUnderline(
                     child: DropdownButton<String>(
                       value: null,
+                      dropdownColor: Colors.white,
                       hint: Padding(
                         padding: const EdgeInsets.only(left: 12),
                         child: Text(
@@ -73,31 +74,41 @@ class HostInputWidget extends StatelessWidget {
                           style: TextStyle(
                             fontFamily: 'SpaceMono',
                             fontSize: 12,
-                            color: Colors.grey[500],
+                            color: isDark ? Colors.grey[300] : Colors.black87,
                           ),
                         ),
                       ),
                       items: const [
                         DropdownMenuItem(
                           value: 'google.com',
-                          child: Text('google.com'),
+                          child: Text(
+                            'google.com',
+                            style: TextStyle(color: Colors.black),
+                          ),
                         ),
                         DropdownMenuItem(
                           value: '1.1.1.1',
-                          child: Text('1.1.1.1 (Cloudflare)'),
+                          child: Text(
+                            '1.1.1.1 (Cloudflare)',
+                            style: TextStyle(color: Colors.black),
+                          ),
                         ),
                         DropdownMenuItem(
                           value: '8.8.8.8',
-                          child: Text('8.8.8.8 (Google DNS)'),
+                          child: Text(
+                            '8.8.8.8 (Google DNS)',
+                            style: TextStyle(color: Colors.black),
+                          ),
                         ),
                       ],
                       onChanged: (val) {
                         if (val != null) controller.text = val;
                       },
                       isExpanded: true,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontFamily: 'SpaceMono',
                         fontSize: 12,
+                        color: isDark ? Colors.white : Colors.black87,
                       ),
                     ),
                   ),

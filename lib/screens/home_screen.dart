@@ -57,11 +57,11 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed: () => Scaffold.of(ctx).openDrawer(),
           ),
         ),
-        title: const Text('Ping & Net'),
+        title: const Text('Network + CVE Tools'),
         actions: [
           IconButton(
             icon: const Icon(Icons.share),
-            onPressed: () => Share.share('Check out Ping & Net + CVE app!'),
+            onPressed: () => Share.share('Check out Network + CVE Tools app!'),
           ),
         ],
       ),
@@ -116,12 +116,7 @@ class _HomeScreenState extends State<HomeScreen> {
               _ToolItem('DNS', Icons.dns, () {
                 _navigate(DnsScreen(host: _hostController.text.trim()));
               }),
-              _ToolItem('Reverse DNS', Icons.swap_horiz, () {
-                _navigate(DnsScreen(
-                  host: _hostController.text.trim(),
-                  isReverse: true,
-                ));
-              }),
+
               _ToolItem('Traceroute', Icons.route, () {
                 _navigate(TracerouteScreen(host: _hostController.text.trim()));
               }),
@@ -156,19 +151,22 @@ class _HomeScreenState extends State<HomeScreen> {
                 _navigate(WhoisScreen(host: _hostController.text.trim()));
               }),
               _ToolItem('RDAP', Icons.policy, () {
-                _showComingSoon('RDAP');
+                _navigate(RdapScreen(host: _hostController.text.trim()));
               }),
-              _ToolItem('IDN ↔ ACE', Icons.translate, () {
-                _navigate(IdnAceScreen(host: _hostController.text.trim()));
+              _ToolItem('Subnet Calculator', Icons.calculate, () {
+                _navigate(SubnetCalculatorScreen(host: _hostController.text.trim()));
               }),
-              _ToolItem('Wake on LAN', Icons.power, () {
-                _navigate(WakeOnLanScreen(host: _hostController.text.trim()));
+              _ToolItem('Binary Calculator', Icons.numbers, () {
+                _navigate(const BinaryCalculatorScreen());
               }),
               _ToolItem('Spam Check', Icons.block, () {
                 _navigate(SpamCheckScreen(host: _hostController.text.trim()));
               }),
-              _ToolItem('Path MTU', Icons.straighten, () {
-                _navigate(PathMtuScreen(host: _hostController.text.trim()));
+              _ToolItem('Hex Calculator', Icons.functions, () {
+                _navigate(const HexCalculatorScreen());
+              }),
+              _ToolItem('Pass Generator', Icons.password, () {
+                _navigate(const PasswordGeneratorScreen());
               }),
             ]),
 
@@ -227,7 +225,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 Icon(Icons.network_ping, color: Colors.white, size: 36),
                 SizedBox(height: 8),
                 Text(
-                  'Ping & Net + CVE',
+                  'Settings',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 18,
@@ -238,16 +236,43 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
           ),
-          _drawerItem(Icons.dns, 'List of servers', () {}),
-          _drawerItem(Icons.storage, 'List of DNS servers', () {}),
-          _drawerItem(Icons.email, 'Email results', () {}),
-          _drawerItem(Icons.save, 'Save results', () {}),
-          _drawerItem(Icons.close, 'Close all tabs', () {}),
+          _drawerItem(Icons.dns, 'List of servers', () {
+            Navigator.pop(context);
+            _showServersList();
+          }),
+          _drawerItem(Icons.storage, 'List of DNS servers', () {
+            Navigator.pop(context);
+            _showDnsServersList();
+          }),
+          _drawerItem(Icons.email, 'Email results', () {
+            Navigator.pop(context);
+            _emailResults();
+          }),
+          _drawerItem(Icons.save, 'Save results', () {
+            Navigator.pop(context);
+            _saveResults();
+          }),
+          _drawerItem(Icons.close, 'Close all tabs', () {
+            Navigator.pop(context);
+            Navigator.popUntil(context, (route) => route.isFirst);
+          }),
           const Divider(),
-          _drawerItem(Icons.settings, 'Preferences', () {}),
-          _drawerItem(Icons.help_outline, 'Help', () {}),
-          _drawerItem(Icons.info, 'About / FAQ', () {}),
-          _drawerItem(Icons.history, 'Version history', () {}),
+          _drawerItem(Icons.settings, 'Preferences', () {
+            Navigator.pop(context);
+            _showPreferences();
+          }),
+          _drawerItem(Icons.help_outline, 'Help', () {
+            Navigator.pop(context);
+            _showHelp();
+          }),
+          _drawerItem(Icons.info, 'About / FAQ', () {
+            Navigator.pop(context);
+            _showAbout();
+          }),
+          _drawerItem(Icons.history, 'Version history', () {
+            Navigator.pop(context);
+            _showVersionHistory();
+          }),
           const Divider(),
           // CVE Search in drawer too
           _drawerItem(
@@ -286,6 +311,180 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       onTap: onTap,
       dense: true,
+    );
+  }
+
+  void _showServersList() {
+    showModalBottomSheet(
+      context: context,
+      builder: (_) => _SimpleListSheet(
+        title: 'List of servers',
+        items: const [
+          'google.com',
+          'cloudflare.com',
+          'github.com',
+          '1.1.1.1',
+          '8.8.8.8',
+        ],
+        onItemTap: (val) {
+          _hostController.text = val;
+          Navigator.pop(context);
+        },
+      ),
+    );
+  }
+
+  void _showDnsServersList() {
+    showModalBottomSheet(
+      context: context,
+      builder: (_) => _SimpleListSheet(
+        title: 'List of DNS servers',
+        items: const [
+          '1.1.1.1 (Cloudflare)',
+          '8.8.8.8 (Google)',
+          '9.9.9.9 (Quad9)',
+          '208.67.222.222 (OpenDNS)',
+        ],
+        onItemTap: (val) {
+          _hostController.text = val.split(' ').first;
+          Navigator.pop(context);
+        },
+      ),
+    );
+  }
+
+  void _emailResults() {
+    final host = _hostController.text.trim();
+    Share.share('Network + CVE Tools result export\nHost: $host');
+  }
+
+  void _saveResults() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Saved (local placeholder)')),
+    );
+  }
+
+  void _showPreferences() {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Preferences'),
+        content: const Text(
+          'Preferences UI will be expanded in next update.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showHelp() {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Help'),
+        content: const Text(
+          'Enter host/IP, then run tools from grid.\nUse drawer for quick actions.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showAbout() {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('About / FAQ'),
+        content: const Text(
+          'Network + CVE Tools \nNetwork utility and CVE lookup app.\n'
+          'If you have any questions,suggestions or problems regarding the APP \n'
+          'please dont hesitate to contact us : tac@yohanesfc.web.id \n'
+          'You can also support this APP by donate to \n'
+          'BCA - 5000389341 - Yohanes Lengkong '
+          ,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showVersionHistory() {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Version history'),
+        content: const Text(
+          'v1.0 - Base tools\nv1.1 - CVE Search integration\nv1.2 - Extra tools added',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SimpleListSheet extends StatelessWidget {
+  final String title;
+  final List<String> items;
+  final ValueChanged<String> onItemTap;
+
+  const _SimpleListSheet({
+    required this.title,
+    required this.items,
+    required this.onItemTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(
+                fontFamily: 'SpaceMono',
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
+            ),
+            const SizedBox(height: 8),
+            ...items.map(
+              (e) => ListTile(
+                dense: true,
+                leading: const Icon(Icons.chevron_right),
+                title: Text(
+                  e,
+                  style: const TextStyle(fontFamily: 'SpaceMono', fontSize: 12),
+                ),
+                onTap: () => onItemTap(e),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

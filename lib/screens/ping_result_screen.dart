@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:dart_ping/dart_ping.dart';
 
@@ -18,6 +19,7 @@ class PingResultScreen extends StatefulWidget {
 class _PingResultScreenState extends State<PingResultScreen> {
   final List<String> _lines = [];
   bool _running = true;
+  StreamSubscription<PingData>? _pingSubscription;
 
   @override
   void initState() {
@@ -30,7 +32,7 @@ class _PingResultScreenState extends State<PingResultScreen> {
     _addLine('PING ${widget.host} (${widget.pingType})');
     _addLine('');
 
-    ping.stream.listen(
+    _pingSubscription = ping.stream.listen(
       (event) {
         if (event.error != null) {
           _addLine('Error: ${event.error}');
@@ -54,21 +56,34 @@ class _PingResultScreenState extends State<PingResultScreen> {
             _addLine('rtt min/avg/max = '
                 '${s.time?.inMilliseconds ?? '-'}ms');
           }
-          setState(() => _running = false);
+          if (mounted) {
+            setState(() => _running = false);
+          }
         }
       },
       onError: (e) {
         _addLine('Error: $e');
-        setState(() => _running = false);
+        if (mounted) {
+          setState(() => _running = false);
+        }
       },
       onDone: () {
-        setState(() => _running = false);
+        if (mounted) {
+          setState(() => _running = false);
+        }
       },
     );
   }
 
   void _addLine(String line) {
+    if (!mounted) return;
     setState(() => _lines.add(line));
+  }
+
+  @override
+  void dispose() {
+    _pingSubscription?.cancel();
+    super.dispose();
   }
 
   @override

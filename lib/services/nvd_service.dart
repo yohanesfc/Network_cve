@@ -7,7 +7,7 @@ class NvdService {
   
   // Optional: set your NVD API key here for higher rate limits
   // Get free key at: https://nvd.nist.gov/developers/request-an-api-key
-  static const String? _apiKey = null; // 'YOUR_NVD_API_KEY';
+  static const String? _apiKey = null; // '6d603b60-33dd-4ff0-8b1c-4a53444b0167';
 
   Map<String, String> get _headers {
     final h = {'Content-Type': 'application/json'};
