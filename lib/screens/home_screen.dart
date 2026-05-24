@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../main.dart';
 import '../widgets/tool_button.dart';
 import '../widgets/host_input.dart';
@@ -7,6 +9,7 @@ import 'ping_result_screen.dart';
 import 'dns_screen.dart';
 import 'cve_search_screen.dart';
 import 'extra_tools_screen.dart';
+import 'speed_test_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -17,7 +20,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _hostController = TextEditingController(
-    text: '192.168.100.1',
+    text: '8.8.8.8',
   );
 
   @override
@@ -33,7 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void _ping(String type) {
     final host = _hostController.text.trim();
     if (host.isEmpty) {
-      _showError('Masukkan host terlebih dahulu');
+      _showError('Input Hostname or IP Address');
       return;
     }
     _navigate(PingResultScreen(host: host, pingType: type));
@@ -48,92 +51,84 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final color = isDark ? const Color(0xFF4DB6C8) : AppTheme.primary;
 
     return Scaffold(
-      appBar: AppBar(
-        leading: Builder(
-          builder: (ctx) => IconButton(
-            icon: const Icon(Icons.menu),
-            onPressed: () => Scaffold.of(ctx).openDrawer(),
+      // ── Gradient AppBar ──────────────────────────────────────────────────
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(kToolbarHeight),
+        child: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFF006B7A), Color(0xFF004A55)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
           ),
-        ),
-        title: const Text('Network + CVE Tools'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.share),
-            onPressed: () => Share.share('Check out Network + CVE Tools app!'),
-          ),
-        ],
-      ),
-      drawer: _buildDrawer(isDark),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Host Input
-            HostInputWidget(controller: _hostController),
-            const SizedBox(height: 16),
-
-            // Ping row
-            Row(
+          child: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            shadowColor: Colors.transparent,
+            surfaceTintColor: Colors.transparent,
+            leading: Builder(
+              builder: (ctx) => IconButton(
+                icon: const Icon(Icons.menu, color: Colors.white),
+                onPressed: () => Scaffold.of(ctx).openDrawer(),
+              ),
+            ),
+            title: const Row(
               children: [
-                const Text(
-                  'Ping:',
+                Icon(Icons.network_ping, color: Colors.white, size: 20),
+                SizedBox(width: 8),
+                Text(
+                  'Network + CVE Tools',
                   style: TextStyle(
-                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
                     fontFamily: 'SpaceMono',
-                    fontSize: 14,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: ToolButton(
-                    label: 'IPv4',
-                    onTap: () => _ping('IPv4'),
-                  ),
-                ),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: ToolButton(
-                    label: 'IPv6',
-                    onTap: () => _ping('IPv6'),
-                  ),
-                ),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: ToolButton(
-                    label: 'TCP',
-                    onTap: () => _ping('TCP'),
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 10),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.share, color: Colors.white),
+                onPressed: () =>
+                    Share.share('Check out Network + CVE Tools app!'),
+              ),
+            ],
+          ),
+        ),
+      ),
 
-            // Tool Grid
+      drawer: _buildDrawer(isDark),
+
+      // ── Body ─────────────────────────────────────────────────────────────
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(14, 14, 14, 24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Host input
+            HostInputWidget(controller: _hostController),
+            const SizedBox(height: 20),
+
+            // ── Ping ────────────────────────────────────────────────────────
+            _buildSectionHeader('Ping', Icons.wifi_tethering, color),
+            const SizedBox(height: 10),
+            _buildPingRow(),
+            const SizedBox(height: 22),
+
+            // ── Network Diagnostics ─────────────────────────────────────────
+            _buildSectionHeader('Network Diagnostics', Icons.network_check, color),
+            const SizedBox(height: 10),
             _buildGrid([
               _ToolItem('DNS', Icons.dns, () {
                 _navigate(DnsScreen(host: _hostController.text.trim()));
               }),
-
               _ToolItem('Traceroute', Icons.route, () {
                 _navigate(TracerouteScreen(host: _hostController.text.trim()));
-              }),
-              _ToolItem('HTTP Headers', Icons.http, () {
-                _navigate(HttpHeadersScreen(host: _hostController.text.trim()));
-              }),
-              _ToolItem('SSL Scan', Icons.lock, () {
-                _navigate(SslScanScreen(host: _hostController.text.trim()));
-              }),
-              _ToolItem('Port Range', Icons.lan, () {
-                _navigate(PortScanScreen(host: _hostController.text.trim()));
-              }),
-              _ToolItem('Subnet Scan', Icons.network_check, () {
-                _navigate(SubnetScanScreen(host: _hostController.text.trim()));
-              }),
-              _ToolItem('Network Info', Icons.info_outline, () {
-                _navigate(const NetworkInfoScreen());
               }),
               _ToolItem('Dig', Icons.search, () {
                 _navigate(DigScreen(host: _hostController.text.trim()));
@@ -141,8 +136,40 @@ class _HomeScreenState extends State<HomeScreen> {
               _ToolItem('Secure DNS', Icons.security, () {
                 _navigate(SecureDnsScreen(host: _hostController.text.trim()));
               }),
-              _ToolItem('Is it up?', Icons.check_circle_outline, () {
-                _navigate(IsItUpScreen(host: _hostController.text.trim()));
+              _ToolItem('Speed Test', Icons.speed, () {
+                _navigate(const SpeedTestScreen());
+              }),
+              _ToolItem('HTTP Headers', Icons.http, () {
+                _navigate(HttpHeadersScreen(host: _hostController.text.trim()));
+              }),
+            ]),
+            const SizedBox(height: 22),
+
+            // ── Scanning & Security ─────────────────────────────────────────
+            _buildSectionHeader('Scanning & Security', Icons.shield, color),
+            const SizedBox(height: 10),
+            _buildGrid([
+              _ToolItem('SSL Scan', Icons.lock, () {
+                _navigate(SslScanScreen(host: _hostController.text.trim()));
+              }),
+              _ToolItem('Port Range', Icons.lan, () {
+                _navigate(PortScanScreen(host: _hostController.text.trim()));
+              }),
+              _ToolItem('Subnet Scan', Icons.manage_search, () {
+                _navigate(SubnetScanScreen(host: _hostController.text.trim()));
+              }),
+              _ToolItem('Spam Check', Icons.block, () {
+                _navigate(SpamCheckScreen(host: _hostController.text.trim()));
+              }),
+            ]),
+            const SizedBox(height: 22),
+
+            // ── Network Info ────────────────────────────────────────────────
+            _buildSectionHeader('Network Info', Icons.info_outline, color),
+            const SizedBox(height: 10),
+            _buildGrid([
+              _ToolItem('Network Info', Icons.info, () {
+                _navigate(const NetworkInfoScreen());
               }),
               _ToolItem('Geo Lookup', Icons.map, () {
                 _navigate(GeoLookupScreen(host: _hostController.text.trim()));
@@ -153,52 +180,147 @@ class _HomeScreenState extends State<HomeScreen> {
               _ToolItem('RDAP', Icons.policy, () {
                 _navigate(RdapScreen(host: _hostController.text.trim()));
               }),
-              _ToolItem('Subnet Calculator', Icons.calculate, () {
+            ]),
+            const SizedBox(height: 22),
+
+            // ── Calculators (grouped) ───────────────────────────────────────
+            _buildSectionHeader('Calculators', Icons.calculate, color),
+            const SizedBox(height: 10),
+            _buildGrid([
+              _ToolItem('Subnet Calc', Icons.calculate, () {
                 _navigate(SubnetCalculatorScreen(host: _hostController.text.trim()));
               }),
-              _ToolItem('Binary Calculator', Icons.numbers, () {
+              _ToolItem('Binary Calc', Icons.numbers, () {
                 _navigate(const BinaryCalculatorScreen());
               }),
-              _ToolItem('Spam Check', Icons.block, () {
-                _navigate(SpamCheckScreen(host: _hostController.text.trim()));
-              }),
-              _ToolItem('Hex Calculator', Icons.functions, () {
+              _ToolItem('Hex Calc', Icons.functions, () {
                 _navigate(const HexCalculatorScreen());
               }),
+            ]),
+            const SizedBox(height: 22),
+
+            // ── Security Tools ──────────────────────────────────────────────
+            _buildSectionHeader('Security Tools', Icons.password, color),
+            const SizedBox(height: 10),
+            _buildGrid([
               _ToolItem('Pass Generator', Icons.password, () {
                 _navigate(const PasswordGeneratorScreen());
               }),
             ]),
+            const SizedBox(height: 22),
 
-            const SizedBox(height: 12),
-
-            // ===== CVE SEARCH BUTTON (NEW - HIGHLIGHTED) =====
+            // ── CVE Search ──────────────────────────────────────────────────
+            _buildSectionHeader('Vulnerability', Icons.bug_report, AppTheme.accent),
+            const SizedBox(height: 10),
             _CveSearchButton(
               onTap: () => _navigate(const CveSearchScreen()),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 8),
           ],
         ),
       ),
     );
   }
 
-  void _showComingSoon(String feature) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('$feature - Coming soon'),
-        duration: const Duration(seconds: 1),
+  // ── Section header ───────────────────────────────────────────────────────
+  Widget _buildSectionHeader(String title, IconData icon, Color color) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, size: 14, color: color),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          title.toUpperCase(),
+          style: TextStyle(
+            fontFamily: 'SpaceMono',
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+            color: color,
+            letterSpacing: 1.2,
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Divider(color: color.withValues(alpha: 0.25), thickness: 1),
+        ),
+      ],
+    );
+  }
+
+  // ── Ping row ─────────────────────────────────────────────────────────────
+  Widget _buildPingRow() {
+    return Row(
+      children: [
+        _buildPingButton('IPv4', Icons.computer, () => _ping('IPv4')),
+        const SizedBox(width: 8),
+        _buildPingButton('IPv6', Icons.devices, () => _ping('IPv6')),
+        const SizedBox(width: 8),
+        _buildPingButton('TCP', Icons.cable, () => _ping('TCP')),
+      ],
+    );
+  }
+
+  Widget _buildPingButton(String label, IconData icon, VoidCallback onTap) {
+    return Expanded(
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(12),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF006B7A), Color(0xFF00838F)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: AppTheme.primary.withValues(alpha: 0.3),
+                  blurRadius: 8,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, color: Colors.white, size: 20),
+                const SizedBox(height: 5),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontFamily: 'SpaceMono',
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
 
+  // ── Tool Grid ─────────────────────────────────────────────────────────────
   Widget _buildGrid(List<_ToolItem> items) {
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 3.5,
+        crossAxisCount: 3,
+        mainAxisExtent: 100,
         crossAxisSpacing: 8,
         mainAxisSpacing: 8,
       ),
@@ -216,8 +338,14 @@ class _HomeScreenState extends State<HomeScreen> {
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
-          DrawerHeader(
-            decoration: BoxDecoration(color: AppTheme.primary),
+          const DrawerHeader(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFF006B7A), Color(0xFF004A55)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
             child: const Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.end,
@@ -236,26 +364,26 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
           ),
-          _drawerItem(Icons.dns, 'List of servers', () {
+          _drawerItem(Icons.dns, 'Servers', () {
             Navigator.pop(context);
             _showServersList();
           }),
-          _drawerItem(Icons.storage, 'List of DNS servers', () {
-            Navigator.pop(context);
-            _showDnsServersList();
-          }),
-          _drawerItem(Icons.email, 'Email results', () {
+//          _drawerItem(Icons.storage, 'DNS servers', () {
+//            Navigator.pop(context);
+//            _showDnsServersList();
+//          }),
+          _drawerItem(Icons.email, 'E-mail', () {
             Navigator.pop(context);
             _emailResults();
           }),
-          _drawerItem(Icons.save, 'Save results', () {
-            Navigator.pop(context);
-            _saveResults();
-          }),
-          _drawerItem(Icons.close, 'Close all tabs', () {
-            Navigator.pop(context);
-            Navigator.popUntil(context, (route) => route.isFirst);
-          }),
+//          _drawerItem(Icons.save, 'Save', () {
+//            Navigator.pop(context);
+//            _saveResults();
+//          }),
+//         _drawerItem(Icons.close, 'Close all tabs', () {
+//            Navigator.pop(context);
+//            Navigator.popUntil(context, (route) => route.isFirst);
+//          }),
           const Divider(),
           _drawerItem(Icons.settings, 'Preferences', () {
             Navigator.pop(context);
@@ -318,7 +446,7 @@ class _HomeScreenState extends State<HomeScreen> {
     showModalBottomSheet(
       context: context,
       builder: (_) => _SimpleListSheet(
-        title: 'List of servers',
+        title: 'Servers',
         items: const [
           'google.com',
           'cloudflare.com',
@@ -338,7 +466,7 @@ class _HomeScreenState extends State<HomeScreen> {
     showModalBottomSheet(
       context: context,
       builder: (_) => _SimpleListSheet(
-        title: 'List of DNS servers',
+        title: 'DNS servers',
         items: const [
           '1.1.1.1 (Cloudflare)',
           '8.8.8.8 (Google)',
@@ -355,12 +483,35 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _emailResults() {
     final host = _hostController.text.trim();
-    Share.share('Network + CVE Tools result export\nHost: $host');
+    final subject = Uri.encodeComponent('Network + CVE Tools — Report for $host');
+    final body = Uri.encodeComponent(
+      'Hello,\n\n'
+      'I am sharing network results from Network + CVE Tools.\n\n'
+      'Host / IP : $host\n\n'
+      '— Sent via Network + CVE Tools',
+    );
+    final uri = Uri.parse('mailto:noc@yohanesfc.web.id?subject=$subject&body=$body');
+    launchUrl(uri).catchError((_) {
+      if (!mounted) return false;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No email app found on this device.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return false;
+    });
   }
 
   void _saveResults() {
+    final host = _hostController.text.trim();
+    final text = 'Network + CVE Tools\nHost / IP : $host';
+    Clipboard.setData(ClipboardData(text: text));
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Saved (local placeholder)')),
+      const SnackBar(
+        content: Text('📋 Copied to clipboard!'),
+        duration: Duration(seconds: 2),
+      ),
     );
   }
 
@@ -406,12 +557,16 @@ class _HomeScreenState extends State<HomeScreen> {
       builder: (_) => AlertDialog(
         title: const Text('About / FAQ'),
         content: const Text(
-          'Network + CVE Tools \nNetwork utility and CVE lookup app.\n'
-          'If you have any questions,suggestions or problems regarding the APP \n'
-          'please dont hesitate to contact us : tac@yohanesfc.web.id \n'
-          'You can also support this APP by donate to \n'
-          'BCA - 5000389341 - Yohanes Lengkong '
-          ,
+          'Network + CVE Tools\n'
+          'A comprehensive network utility and CVE lookup application.\n\n'
+          'We truly appreciate your time using this app. '
+          'Should you have any questions, suggestions, or encounter any issues, '
+          'please feel free to reach out to us — we\'d love to hear from you:\n'
+          '📧 tac@yohanesfc.web.id\n\n'
+          'If you find this app helpful and would like to support its continued development, '
+          'your generosity would mean a great deal to us:\n'
+          '🏦 BCA · 5000389341 · Yohanes Lengkong\n\n'
+          'Thank you so much for your kind support! 🙏',
         ),
         actions: [
           TextButton(
@@ -548,9 +703,9 @@ class _CveSearchButtonState extends State<_CveSearchButton>
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: AppTheme.accent.withOpacity(0.4),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
+                  color: AppTheme.accent.withValues(alpha: 0.45),
+                  blurRadius: 16,
+                  offset: const Offset(0, 5),
                 ),
               ],
             ),
@@ -560,7 +715,7 @@ class _CveSearchButtonState extends State<_CveSearchButton>
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withValues(alpha: 0.2),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(Icons.bug_report, color: Colors.white, size: 22),

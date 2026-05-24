@@ -1,13 +1,14 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/cve_model.dart';
+import '../env/env.dart';
 
 class NvdService {
   static const String _baseUrl = 'https://services.nvd.nist.gov/rest/json/cves/2.0';
   
   // Optional: set your NVD API key here for higher rate limits
   // Get free key at: https://nvd.nist.gov/developers/request-an-api-key
-  static const String? _apiKey = null; // '6d603b60-33dd-4ff0-8b1c-4a53444b0167';
+  static final String? _apiKey = Env.nvdApiKey.isNotEmpty ? Env.nvdApiKey : null;
 
   Map<String, String> get _headers {
     final h = {'Content-Type': 'application/json'};
@@ -57,7 +58,7 @@ class NvdService {
 
     final uri = Uri.parse(
       '$_baseUrl?pubStartDate=$pubStartDate&pubEndDate=$pubEndDate'
-      '&cvssV3SeverityFilter=HIGH,CRITICAL&resultsPerPage=20',
+      '&cvssV3Severity=CRITICAL&resultsPerPage=20',
     );
 
     try {
@@ -84,7 +85,7 @@ class NvdService {
 
   Future<List<CveItem>> _getFallbackFeed() async {
     final uri = Uri.parse(
-      '$_baseUrl?cvssV3SeverityFilter=CRITICAL&resultsPerPage=15',
+      '$_baseUrl?cvssV3Severity=CRITICAL&resultsPerPage=15',
     );
     final response = await http.get(uri, headers: _headers)
         .timeout(const Duration(seconds: 15));

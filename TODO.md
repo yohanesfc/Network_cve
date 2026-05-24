@@ -21,3 +21,8 @@
 - [x] Run `flutter test` (abort if environment/device constraints)
 - [x] Run `flutter analyze` and fix issues
 - [x] Update TODO progress and finalize
+- [x] Redesign HomeScreen UI to a modern dashboard with glassmorphism and groupings
+- [x] Secure NVD API Key using `envied` for obfuscation
+- [x] Add feature screen: Hex Calculator (replaced Path MTU)
+- [x] Add feature screen: Random Password Generator
+- [x] Fix CVE News feed to use correct NVD API v2.0 parameters (`cvssV3Severity`)

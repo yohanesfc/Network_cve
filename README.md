@@ -1,20 +1,22 @@
-# Ping & Net + CVE Search - Flutter App
+# Network + CVE Tools - Flutter App
 
-Gabungan antara **Ping & Net Tools** dan **CVE Search** (powered by NIST NVD API).
+Gabungan antara **Network Tools** dan **CVE Search** (powered by NIST NVD API).
 
 ---
 
 ## 📱 Fitur
 
-### Ping & Net Tools
+### Network Tools
 - Ping IPv4 / IPv6 / TCP
 - DNS Lookup & Reverse DNS
 - HTTP Headers
 - Port Range Scan (common ports)
 - Network Info (public IP, geolocation)
-- Geo Lookup
+- Subnet Calculator & Subnet Scan
+- Hex Calculator (BARU)
+- Random Password Generator (BARU)
+- SSL Scan, Secure DNS, Dig, Is it up?, IDN ↔ ACE, Spam Check
 - Whois / RDAP
-- Traceroute (info)
 - Dan lainnya...
 
 ### CVE Search (BARU - Terintegrasi)
@@ -33,10 +35,14 @@ Gabungan antara **Ping & Net Tools** dan **CVE Search** (powered by NIST NVD API
 flutter --version  # Minimal Flutter 3.10+
 ```
 
-### 1. Install dependencies
+### 1. Install dependencies & Generate Env
 ```bash
 cd pingnet_cve
 flutter pub get
+# Create .env file for API Key (Opsional)
+echo "NVD_API_KEY=" > .env
+# Run build_runner to generate Env class
+dart run build_runner build -d
 ```
 
 ### 2. Download fonts (SpaceMono)
@@ -72,10 +78,12 @@ Tanpa API key, NVD membatasi request ke ~5 req/30 detik.
 Dengan API key gratis: unlimited.
 
 1. Daftar di: https://nvd.nist.gov/developers/request-an-api-key
-2. Set di `lib/services/nvd_service.dart`:
-```dart
-static const String? _apiKey = 'YOUR_KEY_HERE';
+2. Buat file `.env` di root folder project.
+3. Tambahkan key Anda:
+```env
+NVD_API_KEY=YOUR_KEY_HERE
 ```
+4. Jalankan `dart run build_runner build -d` untuk meng-generate konfigurasi `envied`. API Key akan diobfuscate secara otomatis untuk keamanan.
 
 ---
 
@@ -85,7 +93,7 @@ static const String? _apiKey = 'YOUR_KEY_HERE';
 lib/
 ├── main.dart                  # App entry, themes
 ├── screens/
-│   ├── home_screen.dart       # Main screen (Ping & Net + tombol CVE)
+│   ├── home_screen.dart       # Main screen (Network + tombol CVE)
 │   ├── cve_search_screen.dart # CVE Search + News Feed
 │   ├── cve_detail_screen.dart # Detail CVE dengan CVSS breakdown
 │   ├── ping_result_screen.dart
@@ -104,9 +112,11 @@ lib/
 
 ## 🎨 Design
 
+- **UI Style**: Modern Glassmorphism Dashboard, Soft Gradients, Premium Aesthetics
 - **Font**: Space Mono (monospace, tech aesthetic)
 - **Color scheme**: Teal (#006B7A) untuk Ping tools, Orange (#FF6B35) untuk CVE
-- **Dark mode**: Full support
+- **Dark mode**: Full support, deep contrast colors
+- **Navigasi**: Grouped features (Network Tests, Analysis, Info, Utils, dll)
 - Tombol CVE Search: Highlighted dengan gradient + pulse animation
 
 ---

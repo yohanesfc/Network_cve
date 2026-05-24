@@ -394,7 +394,7 @@ class _IdnAceScreenState extends State<IdnAceScreen> {
               controller: _input,
               decoration: const InputDecoration(
                 labelText: 'Domain',
-                hintText: 'contoh: bücher.de / xn--bcher-kva.de',
+                hintText: 'example: detik.com / cnn.com',
               ),
             ),
             const SizedBox(height: 12),
@@ -1357,12 +1357,12 @@ class _PasswordGeneratorScreenState extends State<PasswordGeneratorScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Random Password Generator')),
+      appBar: AppBar(title: const Text('Password Generator')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           const Text(
-            'This tool can generate secure, strong, random passwords. To ensure security, the password is generated completely on your device without being sent across the Internet.',
+            'This tool creates robust, unpredictable passwords for your security. To protect your privacy, all generation happens locally on your device and is never transmitted over the web.',
             style: TextStyle(fontSize: 13),
           ),
           const SizedBox(height: 16),
