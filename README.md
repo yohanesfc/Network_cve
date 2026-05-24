@@ -1,10 +1,10 @@
 # Network + CVE Tools - Flutter App
 
-Gabungan antara **Network Tools** dan **CVE Search** (powered by NIST NVD API).
+A comprehensive integration of **Network Tools** and **CVE Search** (powered by the NIST NVD API).
 
 ---
 
-## 📱 Fitur
+## 📱 Features
 
 ### Network Tools
 - Ping IPv4 / IPv6 / TCP
@@ -13,18 +13,18 @@ Gabungan antara **Network Tools** dan **CVE Search** (powered by NIST NVD API).
 - Port Range Scan (common ports)
 - Network Info (public IP, geolocation)
 - Subnet Calculator & Subnet Scan
-- Hex Calculator (BARU)
-- Random Password Generator (BARU)
+- Hex Calculator (NEW)
+- Random Password Generator (NEW)
 - SSL Scan, Secure DNS, Dig, Is it up?, IDN ↔ ACE, Spam Check
 - Whois / RDAP
-- Dan lainnya...
+- And more...
 
-### CVE Search (BARU - Terintegrasi)
-- **News Feed**: Latest HIGH/CRITICAL CVEs dari NVD (real-time)
-- **Search**: Cari by keyword (e.g. "Apache", "Log4J2") atau CVE-ID langsung
-- **Detail View**: Score, CWE, CVSS v3 breakdown (Attack Vector, Complexity, dll)
-- **Share & Copy**: Share CVE info ke apps lain
-- Powered by **NIST National Vulnerability Database API v2.0**
+### CVE Search (NEW - Integrated)
+- **News Feed**: Real-time latest HIGH/CRITICAL CVEs from NVD
+- **Search**: Search by keyword (e.g., "Apache", "Log4J2") or direct CVE-ID
+- **Detail View**: Score, CWE, CVSS v3 breakdown (Attack Vector, Complexity, etc.)
+- **Share & Copy**: Quickly share CVE info to other apps
+- Powered by the **NIST National Vulnerability Database API v2.0**
 
 ---
 
@@ -32,34 +32,34 @@ Gabungan antara **Network Tools** dan **CVE Search** (powered by NIST NVD API).
 
 ### Prerequisites
 ```bash
-flutter --version  # Minimal Flutter 3.10+
+flutter --version  # Minimum Flutter 3.10+
 ```
 
-### 1. Install dependencies & Generate Env
+### 1. Install Dependencies & Generate Env
 ```bash
-cd pingnet_cve
+cd Pingnet_cve
 flutter pub get
-# Create .env file for API Key (Opsional)
+# Create a .env file for the API Key (Optional)
 echo "NVD_API_KEY=" > .env
-# Run build_runner to generate Env class
+# Run build_runner to generate the Env class
 dart run build_runner build -d
 ```
 
-### 2. Download fonts (SpaceMono)
-Buat folder `fonts/` di root project, download dari Google Fonts:
+### 2. Download Fonts (SpaceMono)
+Create a `fonts/` folder in the project root and download it from Google Fonts:
 ```bash
 mkdir fonts
-# Download SpaceMono-Regular.ttf dan SpaceMono-Bold.ttf
-# dari https://fonts.google.com/specimen/Space+Mono
-# Taruh di folder fonts/
+# Download SpaceMono-Regular.ttf and SpaceMono-Bold.ttf
+# from https://fonts.google.com/specimen/Space+Mono
+# Place them in the fonts/ folder
 ```
 
-Atau ganti font di `main.dart` ke font bawaan Flutter:
+Or change the font in `main.dart` to Flutter's default fallback font:
 ```dart
-fontFamily: 'monospace',  // fallback tanpa custom font
+fontFamily: 'monospace',  // fallback without custom font
 ```
 
-### 3. Run di device/emulator
+### 3. Run on Device/Emulator
 ```bash
 flutter run
 ```
@@ -67,45 +67,46 @@ flutter run
 ### 4. Build APK
 ```bash
 flutter build apk --release
-# APK ada di build/app/outputs/flutter-apk/app-release.apk
+# The APK is located at build/app/outputs/flutter-apk/app-release.apk
 ```
 
 ---
 
-## 🔑 NVD API Key (Opsional tapi Dianjurkan)
+## 🔑 NVD API Key (Optional but Recommended)
 
-Tanpa API key, NVD membatasi request ke ~5 req/30 detik.
-Dengan API key gratis: unlimited.
+Without an API key, the NVD limits requests to ~5 requests per 30 seconds.
+With a free API key, you get a much higher rate limit for faster and uninterrupted requests.
 
-1. Daftar di: https://nvd.nist.gov/developers/request-an-api-key
-2. Buat file `.env` di root folder project.
-3. Tambahkan key Anda:
+1. Register at: https://nvd.nist.gov/developers/request-an-api-key
+2. Create a `.env` file in the root folder of the project.
+3. Add your key:
 ```env
 NVD_API_KEY=YOUR_KEY_HERE
 ```
-4. Jalankan `dart run build_runner build -d` untuk meng-generate konfigurasi `envied`. API Key akan diobfuscate secara otomatis untuk keamanan.
+4. Run `dart run build_runner build -d` to generate the `envied` configuration. The API Key will be obfuscated automatically for maximum security.
 
 ---
 
-## 📁 Struktur Project
+## 📁 Project Structure
 
 ```
 lib/
-├── main.dart                  # App entry, themes
+├── main.dart                  # App entry point, themes
 ├── screens/
-│   ├── home_screen.dart       # Main screen (Network + tombol CVE)
+│   ├── home_screen.dart       # Main screen (Network + CVE buttons)
 │   ├── cve_search_screen.dart # CVE Search + News Feed
-│   ├── cve_detail_screen.dart # Detail CVE dengan CVSS breakdown
+│   ├── cve_detail_screen.dart # CVE Detail with CVSS breakdown
 │   ├── ping_result_screen.dart
 │   ├── dns_screen.dart        # DNS, Traceroute, PortScan, HTTP, Whois, Geo
 │   └── network_info_screen.dart
+│   └── speed_test_screen.dart # Speed Test tool
 ├── models/
 │   └── cve_model.dart         # CVE data model + NVD JSON parser
 ├── services/
 │   └── nvd_service.dart       # NVD API calls
 └── widgets/
     ├── tool_button.dart       # Reusable tool button
-    └── host_input.dart        # Host input dengan dropdown
+    └── host_input.dart        # Host input with dropdown
 ```
 
 ---
@@ -114,16 +115,16 @@ lib/
 
 - **UI Style**: Modern Glassmorphism Dashboard, Soft Gradients, Premium Aesthetics
 - **Font**: Space Mono (monospace, tech aesthetic)
-- **Color scheme**: Teal (#006B7A) untuk Ping tools, Orange (#FF6B35) untuk CVE
-- **Dark mode**: Full support, deep contrast colors
-- **Navigasi**: Grouped features (Network Tests, Analysis, Info, Utils, dll)
-- Tombol CVE Search: Highlighted dengan gradient + pulse animation
+- **Color Scheme**: Teal (#006B7A) for Ping tools, Orange (#FF6B35) for CVE
+- **Dark Mode**: Full support, deep contrast colors
+- **Navigation**: Grouped features (Network Tests, Analysis, Info, Utils, etc.)
+- **CVE Search Button**: Highlighted with a gradient + pulse animation
 
 ---
 
-## ⚠️ Catatan
+## ⚠️ Notes
 
-- Fitur ping ICMP mungkin membutuhkan root di beberapa device Android
-- Port scan via TCP connect (bukan raw socket)
-- Traceroute tidak tersedia di mobile (platform limitation)
-- NVD API bisa lambat kadang-kadang (server NIST busy)
+- The ICMP Ping feature might require root access on some Android devices.
+- Port scan is done via TCP connect (not raw sockets).
+- Traceroute is not fully supported on mobile platforms due to operating system limitations.
+- The NVD API can occasionally be slow or unresponsive when the NIST servers are busy.
